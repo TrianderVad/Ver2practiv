@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>История обработок</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+            <h1>История обработок</h1>
+            <a href="/" class="btn">Новый анализ</a>
+        </div>
+
+        {% if logs %}
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Дата обработки</th>
+                    <th>Длительность (сек)</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.timestamp | datetimeformat }}</td>
+                    <td>{{ "%.2f"|format(log.duration) }}</td>
+                    <td>
+                        <a href="/results/{{ log.result_file }}" class="btn">Просмотр</a>
+                        <a href="/static/{{ log.video_file }}" download class="btn">Видео</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <p>Нет данных об обработках</p>
+            <a href="/" class="btn">Начать анализ</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

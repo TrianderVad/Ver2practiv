@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Анализ светофоров</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Анализ светофоров</h1>
+        <div class="nav-buttons">
+            <a href="/history" class="btn">История обработок</a>
+        </div>
+        
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="file-input">
+                <input type="file" name="file" id="fileInput" accept="video/*">
+                <label for="fileInput">Выбрать видео</label>
+            </div>
+            <button type="button" onclick="uploadFile()" class="btn upload-btn">Начать анализ</button>
+        </form>
+
+        <div id="progressContainer">
+            <div id="progressBar"></div>
+            <div id="progressText">0% - Ожидание загрузки</div>
+        </div>
+    </div>
+
+    <script>
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput.files[0]) {
+                alert('Пожалуйста, выберите видеофайл!');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            const xhr = new XMLHttpRequest();
+            
+            xhr.upload.addEventListener('progress', function(e) {
+                const percent = (e.loaded / e.total) * 100;
+                updateProgress(percent, 'Загрузка на сервер...');
+            });
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        window.location = xhr.responseURL;
+                    } else {
+                        alert('Ошибка обработки файла');
+                        updateProgress(0, 'Ошибка обработки');
+                    }
+                }
+            };
+
+            xhr.open('POST', '/upload');
+            xhr.send(formData);
+            
+            const progressCheck = setInterval(() => {
+                fetch('/progress')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.is_processing) {
+                            updateProgress(data.progress, 'Обработка видео...');
+                        }
+                        if (data.progress === 100) {
+                            clearInterval(progressCheck);
+                        }
+                    });
+            }, 1000);
+        }
+
+        function updateProgress(percent, text) {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressBar.style.width = percent + '%';
+            progressText.innerText = `${Math.round(percent)}% - ${text}`;
+            
+            if (percent >= 100) {
+                progressBar.style.backgroundColor = '#4CAF50';
+            }
+        }
+    </script>
+</body>
+</html>

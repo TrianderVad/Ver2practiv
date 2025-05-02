@@ -1,0 +1,156 @@
+/* Базовые стили */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+}
+
+/* Кнопки */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.upload-btn {
+    background: #27ae60;
+    padding: 12px 30px;
+    font-size: 16px;
+}
+
+.navigation {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+/* Форма загрузки */
+.file-input {
+    margin: 25px 0;
+}
+
+.file-input input[type="file"] {
+    display: none;
+}
+
+.file-input label {
+    background: #3498db;
+    padding: 12px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+/* Прогресс-бар */
+#progressContainer {
+    margin-top: 30px;
+    background: #ecf0f1;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+#progressBar {
+    height: 25px;
+    background: #27ae60;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+#progressText {
+    padding: 10px;
+    text-align: center;
+    color: #7f8c8d;
+}
+
+/* Таблицы */
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+}
+
+.results-table th {
+    background: #2c3e50;
+    color: white;
+    padding: 15px;
+    text-align: left;
+}
+
+.results-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.results-table tr:hover {
+    background: #f8f9fa;
+}
+
+.timestamp {
+    font-family: monospace;
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* Видео */
+.video-container {
+    margin: 25px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+video {
+    width: 100%;
+    height: auto;
+}
+
+/* История */
+.history-table {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.history-table th {
+    background: #34495e;
+    padding: 12px;
+    color: white;
+}
+
+.history-table td {
+    padding: 12px;
+    border-bottom: 1px solid #bdc3c7;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px 0;
+    color: #7f8c8d;
+}
