@@ -206,8 +206,8 @@ def show_history():
                 timestamp = int(f.split('_')[1].split('.')[0])
                 
                 # Получаем метаданные видео
-                video_file = f.replace('results_', '').replace('.json', '.mp4')
-                video_path = os.path.join('static', video_file)
+                video_file = f.replace('.json', '.mp4')
+                
                 
                 # Собираем данные для отображения
                 logs.append({
