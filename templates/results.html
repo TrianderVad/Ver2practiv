@@ -7,9 +7,10 @@
 <body>
     <div class="container">
         <div class="video-container">
-            <video id="mainVideo" controls>
-                <source src="/static/{{ video_file }}" type="video/mp4">
-                Ваш браузер не поддерживает видео тег.
+            <video controls muted playsinline class="video-player">
+                <source src="{{ url_for('static', filename=video_file) }}" 
+                        type="video/mp4; codecs=avc1">
+                Ваш браузер не поддерживает видео.
             </video>
         </div>
 
@@ -17,7 +18,7 @@
             <h2>Результаты анализа</h2>
             <div class="export-buttons">
                 <a href="/static/{{ video_file }}" download class="btn">Скачать видео</a>
-                <a href="/static/{{ json_file }}" download class="btn">Сканить данные</a>
+                <a href="/static/{{ json_file }}" download class="btn">Скачать данные</a>
             </div>
         </div>
 
@@ -37,12 +38,18 @@
                     data-end="{{ data.start_drive_time }}">
                     <td>{{ id }}</td>
                     <td>{{ "%.2f"|format(data.time) }} сек</td>
-                    <td class="timestamp">{{ "%.1f"|format(data.start_stop_time) }}</td>
                     <td class="timestamp">
-                        {% if data.start_drive_time %}
-                        {{ "%.1f"|format(data.start_drive_time) }}
+                        {% if data.start_stop_time is not none %}
+                            {{ "%.1f"|format(data.start_stop_time) }}
                         {% else %}
-                        -
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="timestamp">
+                        {% if data.start_drive_time is not none %}
+                            {{ "%.1f"|format(data.start_drive_time) }}
+                        {% else %}
+                            -
                         {% endif %}
                     </td>
                     <td>({{ "%.0f"|format(data.x) }}, {{ "%.0f"|format(data.y) }})</td>
@@ -63,25 +70,21 @@
 
         document.querySelectorAll('.results-table tbody tr').forEach(row => {
             row.addEventListener('click', function() {
-                const startTime = parseFloat(this.dataset.start);
+                const startTime = parseFloat(this.dataset.start) || 0;
                 const endTime = parseFloat(this.dataset.end) || startTime + 5;
                 
-                if (!isNaN(startTime)) {
-                    video.currentTime = startTime;
-                    video.play();
-                    
-                    // Подсветка строки
-                    clearTimeout(highlightTimeout);
-                    document.querySelectorAll('tr').forEach(r => {
-                        r.style.backgroundColor = '';
-                    });
-                    this.style.backgroundColor = '#ffeb3b';
-                    
-                    // Сброс подсветки через 5 секунд
-                    highlightTimeout = setTimeout(() => {
-                        this.style.backgroundColor = '';
-                    }, 5000);
-                }
+                video.currentTime = startTime;
+                video.play();
+                
+                clearTimeout(highlightTimeout);
+                document.querySelectorAll('tr').forEach(r => {
+                    r.style.backgroundColor = '';
+                });
+                this.style.backgroundColor = '#ffeb3b';
+                
+                highlightTimeout = setTimeout(() => {
+                    this.style.backgroundColor = '';
+                }, 5000);
             });
         });
     </script>

@@ -23,7 +23,7 @@ os.makedirs('static', exist_ok=True)
 
 @app.template_filter('datetimeformat')
 def datetimeformat_filter(ts, format='%d.%m.%Y %H:%M'):
-    return datetime.utcfromtimestamp(ts).strftime(format)
+    return datetime.fromtimestamp(ts).strftime(format)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -45,7 +45,7 @@ def safe_rename(src_path, dst_dir):
     os.rename(src_path, dst_path)
     return dst_path
 
-def process_video(path):
+def process_video(path, name):
     cap = cv2.VideoCapture(path)
     fps = cap.get(cv2.CAP_PROP_FPS)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -53,8 +53,8 @@ def process_video(path):
     unique_lights = {}
     light_counter = 1
     threshold_distance = 50
-    output_path = os.path.join('static', os.path.basename(path))
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    output_path = os.path.join(f'static/{name}.mp4')
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')
     out = cv2.VideoWriter(output_path, fourcc, fps, 
                         (int(cap.get(3)), int(cap.get(4))))
     
@@ -111,6 +111,13 @@ def process_video(path):
                     'start_stop_time': frame_count/fps if cls == 'red' else None,
                     'start_drive_time': None
                 }
+                
+                if cls == 'red':
+                    new_light['start_stop_time'] = frame_count/fps
+                else:
+                    new_light['start_stop_time'] = None
+                    new_light['start_drive_time'] = frame_count/fps if cls in ['green', 'yellow'] else None
+
                 updated_lights[light_counter] = new_light
                 light_counter += 1
         
@@ -149,18 +156,20 @@ def upload_file():
         # Сохраняем во временную папку
         file.save(filepath)
         
+        res_file = f"results_{int(time.time())}"
         # Обработка видео
         processing_status['is_processing'] = True
         try:
-            stats = process_video(filepath)
+            stats = process_video(filepath, res_file)
         except Exception as e:
             print(f"Ошибка обработки: {e}")
             return redirect(url_for('index'))
         finally:
             processing_status['is_processing'] = False
         
+    
         # Генерируем уникальное имя для результатов
-        result_filename = f"results_{int(time.time())}.json"
+        result_filename = f"{res_file}.json"
         with open(os.path.join('static', result_filename), 'w') as f:
             json.dump(stats, f, indent=4)
         
@@ -180,10 +189,12 @@ def show_results(filename):
     with open(os.path.join('static', filename)) as f:
         stop_times = json.load(f)
     stop_times = {int(k): v for k, v in stop_times.items()}
-    video_file = filename.replace('results_', '').replace('.json', '') + '_' + filename.split('_')[-1].split('.')[0] + '.mp4'
+    video_file = filename.replace('.json', '')+'.mp4'
+    
+    print(video_file, filename)
     return render_template('results.html', 
                          stop_times=stop_times,
-                         video_file=video_file)
+                         video_file=video_file, json_file = filename)
 
 @app.route('/history')
 def show_history():
