@@ -19,6 +19,8 @@
             <div class="export-buttons">
                 <a href="/static/{{ video_file }}" download class="btn">Скачать видео</a>
                 <a href="/static/{{ json_file }}" download class="btn">Скачать данные</a>
+                <a href="{{ url_for('download_excel', result_filename=json_file) }}" class="btn">Скачать отчет Excel</a>
+
             </div>
         </div>
 

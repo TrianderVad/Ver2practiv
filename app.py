@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
+import pandas as pd
+import io
 from ultralytics import YOLO
 import cv2
 import os
@@ -183,6 +185,40 @@ def upload_file():
         return redirect(url_for('show_results', filename=result_filename))
     
     return redirect(url_for('index'))
+
+@app.route('/download_excel/<result_filename>')
+def download_excel(result_filename):
+    # Загружаем JSON с результатами
+    json_path = os.path.join('static', result_filename)
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    # Преобразуем в список для DataFrame
+    rows = []
+    for id, info in data.items():
+        rows.append({
+            "ID светофора": id,
+            "Время простоя (сек)": round(info.get("time", 0), 2),
+            "Начало остановки (сек)": (round(info.get("start_stop_time", 0), 2) if info.get("start_stop_time") is not None else ""),
+            "Старт движения (сек)": (round(info.get("start_drive_time", 0), 2) if info.get("start_drive_time") is not None else ""),
+            "X": round(info.get("x", 0)),
+            "Y": round(info.get("y", 0)),
+        })
+
+    df = pd.DataFrame(rows)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Отчет')
+    output.seek(0)
+
+    # Имя файла для скачивания
+    excel_filename = result_filename.replace('.json', '.xlsx')
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=excel_filename,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
 @app.route('/results/<filename>')
 def show_results(filename):
